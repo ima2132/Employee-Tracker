@@ -114,3 +114,22 @@ async function viewAllRoles() {
     await query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [employee.first_name, employee.last_name, employee.role_id, employee.manager_id]);
     console.log('Employee added successfully!');
   }
+
+// main function to start the application
+async function start() {
+    // the user will be prompted with the following options 
+    const { action } = await inquirer.prompt({
+      type: 'list',
+      name: 'action',
+      message: 'What would you like to do?',
+      choices: [
+        'View all departments',
+        'View all roles',
+        'View all employees',
+        'Add a department',
+        'Add a role',
+        'Add an employee',
+        'Update an employee role',
+        'Quit'
+      ]
+    });
