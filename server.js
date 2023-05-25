@@ -133,3 +133,37 @@ async function start() {
         'Quit'
       ]
     });
+
+ // performs the selected actions
+ switch (action) {
+    case 'View all departments':
+      await viewAllDepartments();
+      break;
+    case 'View all roles':
+      await viewAllRoles();
+      break;
+    case 'View all employees':
+      await viewAllEmployees();
+      break;
+    case 'Add a department':
+      await addDepartment();
+      break;
+    case 'Add a role':
+      await addRole();
+      break;
+    case 'Add an employee':
+      await addEmployee();
+      break;
+    case 'Update an employee role':
+      await updateEmployeeRole();
+      break;
+    case 'Quit':
+      console.log('Goodbye!');
+      connection.end();
+      return;
+  }
+
+// repeats the process
+    console.log('');
+    await start();
+  }
