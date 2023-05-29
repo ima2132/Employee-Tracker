@@ -167,3 +167,32 @@ async function start() {
     console.log('');
     await start();
   }
+
+// initializes the application
+async function init() {
+    try {
+    // connects to the MySQL database
+      await connection.connect();
+  
+      // executes the schema SQL statements to create the tables
+      const schemaSql = require('fs').readFileSync('schema.sql', 'utf8');
+      await query(schemaSql);
+  
+      console.log('Database schema created successfully!\n');
+  
+      // executes the seeds SQL statements to insert sample data
+      const seedsSql = require('fs').readFileSync('seeds.sql', 'utf8');
+      await query(seedsSql);
+  
+      console.log('Sample data inserted successfully!\n');
+  
+      // starts the application
+      await start();
+    } catch (error) {
+      console.error('Error initializing application:', error);
+      connection.end();
+    }
+  }
+  
+// runs the application
+  init();
