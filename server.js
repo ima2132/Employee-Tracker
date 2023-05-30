@@ -1,13 +1,13 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const consoleTable = require('console.table');
 
 // create a connection to the MySQL database
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: 'company'
+    user: 'root',
+    password: 'password_123',
+    database: 'employee_db'
   });
 
 // function to perform a database query
@@ -23,45 +23,61 @@ async function query(sql, values = []) {
 
 // function to view all departments
 async function viewAllDepartments() {
-    const departments = await query('SELECT * FROM department');
-    console.table(departments);
+    const query = 'SELECT * FROM department';
+    connection.query(query, (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      start();
+    });
   }
 
 // function to view all roles
 async function viewAllRoles() {
-    const roles = await query(`
-      SELECT role.*, department.name AS department_name
-      FROM role
-      INNER JOIN department ON role.department_id = department.id
-    `);
-    console.table(roles);
+    const query = 'SELECT r.id, r.title, r.salary, d.name AS department FROM role r JOIN department d ON r.department_id = d.id';
+    connection.query(query, (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      start();
+    });
   }
   
 // function to view all employees
   async function viewAllEmployees() {
-    const employees = await query(`
-      SELECT employee.*, role.title AS role_title, department.name AS department_name
-      FROM employee
-      INNER JOIN role ON employee.role_id = role.id
-      INNER JOIN department ON role.department_id = department.id
-    `);
-    console.table(employees);
+    const query = `
+      SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
+      FROM employee e
+      JOIN role r ON e.role_id = r.id
+      JOIN department d ON r.department_id = d.id
+      LEFT JOIN employee m ON e.manager_id = m.id;
+    `;
+    connection.query(query, (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      start();
+    });
   }
-  
+
 // function to add a department
-  async function addDepartment() {
-    const department = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'name',
-        message: 'Enter the name of the department:'
-      }
-    ]);
-    
-    await query('INSERT INTO department (name) VALUES (?)', [department.name]);
-    console.log('Department added successfully!');
+async function addDepartment() {
+    const answers = await inquirer
+      .prompt([
+        {
+          name: 'name',
+          type: 'input',
+          message: 'Enter the name of the department:',
+        },
+      ])
+
+      // Insert the department into the database
+      const query = 'INSERT INTO department (name) VALUES (?)';
+      connection.query(query, [answers.name], (err, res) => {
+        if (err) {
+          console.error('Error adding department: ', err);
+        } else {
+          console.log('Department added successfully!');
+        }
+      });
   }
-  
 // function to add a role
   async function addRole() {
     const role = await inquirer.prompt([
@@ -81,9 +97,16 @@ async function viewAllRoles() {
         message: 'Enter the department ID for the role:'
       }
     ]);
-    
-    await query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [role.title, role.salary, role.department_id]);
-    console.log('Role added successfully!');
+
+      // Insert the department into the database
+      const query = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+      connection.query(query, [role.title, role.salary, role.department_id], (err, res) => {
+        if (err) {
+          console.error('Error adding department: ', err);
+        } else {
+          console.log('Role added successfully!');
+        }
+      });
   }
   
 // function to add an employee
@@ -111,9 +134,22 @@ async function viewAllRoles() {
       }
     ]);
     
-    await query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [employee.first_name, employee.last_name, employee.role_id, employee.manager_id]);
-    console.log('Employee added successfully!');
+    const query = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
+    connection.query(query, [employee.first_name, employee.last_name, employee.role_id, employee.manager_id], (err, res) => {
+      if (err) {
+        console.error('Error adding department: ', err);
+      } else {
+        console.log('Employee added successfully!');
+      }
+    });
   }
+
+
+// function to update an employee
+async function updateEmployeeRole() {
+  
+}
+
 
 // main function to start the application
 async function start() {
@@ -171,25 +207,10 @@ async function start() {
 // initializes the application
 async function init() {
     try {
-    // connects to the MySQL database
-      await connection.connect();
-  
-      // executes the schema SQL statements to create the tables
-      const schemaSql = require('fs').readFileSync('schema.sql', 'utf8');
-      await query(schemaSql);
-  
-      console.log('Database schema created successfully!\n');
-  
-      // executes the seeds SQL statements to insert sample data
-      const seedsSql = require('fs').readFileSync('seeds.sql', 'utf8');
-      await query(seedsSql);
-  
-      console.log('Sample data inserted successfully!\n');
-  
       // starts the application
       await start();
     } catch (error) {
-      console.error('Error initializing application:', error);
+      console.error('Error starting application:', error);
       connection.end();
     }
   }

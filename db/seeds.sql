@@ -14,9 +14,9 @@ INSERT INTO role (title, salary, department_id) VALUES
   ('Finance Manager', 98000.00, 4); -- 5
 
 -- inserted sample employees
-INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES
-  ('Eren', 'Jaeger', 2, NULL),
-  ('Mikasa', 'Ackerman', 3, NULL),
-  ('Armin', 'Arlert', 4, 5),
-  ('Hange', 'Zoe', 1, 2),
-  ('Levi', 'Ackerman', 5, NULL);
+INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES
+  (1,'Eren', 'Jaeger', 2, NULL),
+  (2,'Mikasa', 'Ackerman', 3, NULL),
+  (3,'Armin', 'Arlert', 4, 1),
+  (4,'Hange', 'Zoe', 1, 2),
+  (5,'Levi', 'Ackerman', 5, NULL);
