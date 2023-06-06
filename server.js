@@ -3,37 +3,34 @@ const mysql = require('mysql2');
 const consoleTable = require('console.table');
 
 // increase the maximum number of event listeners for the 'warning' event
-require('events').EventEmitter.defaultMaxListeners = 15; // adjust the number as per your needs
+require('events').EventEmitter.defaultMaxListeners = 20; // adjust the number as per your needs
 
 // create a connection to the MySQL database
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password_123',
-    database: 'employee_db'
-  });
+  host: 'localhost',
+  user: 'root',
+  password: 'password_123',
+  database: 'employee_db'
+});
 
-// function to perform a database query
-async function query(sql, values = []) {
-    try {
-      const [rows] = await connection.execute(sql, values);
-      return rows;
-    } catch (error) {
-      console.error('Error executing query:', error);
-      throw error;
-    }
+// connects to the MySQL server
+connection.connect((err) => {
+  if (err) {
+      console.error('Error connecting to the database:', err);
+      return;
   }
+  console.log(`   
+      ╔═══╗-----╔╗--------------╔═╗╔═╗----------------
+      ║╔══╝-----║║--------------║║╚╝║║----------------
+      ║╚══╦╗╔╦══╣║╔══╦╗─╔╦══╦══╗║╔╗╔╗╠══╦═╗╔══╦══╦══╦═╗
+      ║╔══╣╚╝║╔╗║║║╔╗║║─║║║═╣║═╣║║║║║║╔╗║╔╗╣╔╗║╔╗║║═╣╔╝
+      ║╚══╣║║║╚╝║╚╣╚╝║╚═╝║║═╣║═╣║║║║║║╔╗║║║║╔╗║╚╝║║═╣║
+      ╚═══╩╩╩╣╔═╩═╩══╩═╗╔╩══╩══╝╚╝╚╝╚╩╝╚╩╝╚╩╝╚╩═╗╠══╩╝
+      -------║║------╔═╝║---------------------╔═╝║----
+      -------╚╝------╚══╝---------------------╚══╝----`
+  );
+});
 
-// function to view all departments
-async function viewAllDepartments() {
-    const query = 'SELECT * FROM department';
-    connection.query(query, (err, res) => {
-      if (err) throw err;
-      console.log('\n\n');
-      console.table(res);
-      start();
-    });
-  }
 
 // function to view all roles
 async function viewAllRoles() {
@@ -239,7 +236,7 @@ async function addEmployee() {
               {
                 type: 'list',
                 name: 'manager_id',
-                message: "Select the manager for the employee::",
+                message: "Select the manager for the employee:",
                 choices: employeeChoices
               },
             ])
@@ -256,7 +253,7 @@ async function addEmployee() {
                 ],
                 (err, res) => {
                   if (err) {
-                    console.error('Error adding employee: ', err);
+                    console.error('Error adding employee:', err);
                     reject(err);
                   } else {
                     console.log('Employee added successfully!');
@@ -297,19 +294,19 @@ async function updateEmployeeRole() {
           return;
         }
 
-        // Map the employee results to an array of { name, value } objects for inquirer choices
+        // maps the employee results to an array of { name, value } objects for inquirer choices
         const employeeChoices = employeeResults.map((employee) => ({
           name: employee.employee_name,
           value: employee.id,
         }));
 
-        // Map the role results to an array of { name, value } objects for inquirer choices
+        // maps the role results to an array of { name, value } objects for inquirer choices
         const roleChoices = roleResults.map((role) => ({
           name: role.title,
           value: role.id,
         }));
 
-        // Prompt the user to select an employee and role
+        // prompts the user to select an employee and role
         inquirer
           .prompt([
             {
