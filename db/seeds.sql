@@ -1,3 +1,5 @@
+USE employee_db
+
 -- inserted sample departments
 INSERT INTO department (name) VALUES
   ('Sales'),
